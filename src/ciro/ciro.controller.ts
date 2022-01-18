@@ -1,11 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { CiroService } from './ciro.service';
-import { CreateCiroDto } from './dto/create-ciro.dto';
-import { UpdateCiroDto } from './dto/update-ciro.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete
+} from "@nestjs/common";
+import { CiroService } from "./ciro.service";
+import { CreateCiroDto } from "./dto/create-ciro.dto";
+import { UpdateCiroDto } from "./dto/update-ciro.dto";
+import * as moment from "moment";
 
-@Controller('ciro')
+@Controller("ciro")
 export class CiroController {
-  constructor(private readonly ciroService: CiroService) {}
+  constructor(private readonly ciroService: CiroService) {
+  }
 
   @Post()
   create(@Body() createCiroDto: CreateCiroDto) {
@@ -17,18 +27,18 @@ export class CiroController {
     return this.ciroService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ciroService.findOne(+id);
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    return this.ciroService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCiroDto: UpdateCiroDto) {
-    return this.ciroService.update(+id, updateCiroDto);
+  @Patch(":id")
+  update(@Param("id") id: string, @Body() updateCiroDto: UpdateCiroDto) {
+    return this.ciroService.update(id, updateCiroDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ciroService.remove(+id);
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return this.ciroService.remove(id);
   }
 }

@@ -1,26 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCiroDto } from './dto/create-ciro.dto';
 import { UpdateCiroDto } from './dto/update-ciro.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Ciro } from './entities/ciro.entity';
+import { Like, Repository } from 'typeorm';
+import { Dates } from '../dates';
 
 @Injectable()
 export class CiroService {
-  create(createCiroDto: CreateCiroDto) {
-    return 'This action adds a new ciro';
+  Date = new Dates();
+
+  constructor(
+    @InjectRepository(Ciro) private CiroRepository: Repository<Ciro>,
+  ) {}
+
+  async create(createCiroDto: CreateCiroDto) {
+    const newCiro = await this.CiroRepository.create(createCiroDto);
+    return await this.CiroRepository.save(newCiro);
   }
 
-  findAll() {
-    return `This action returns all ciro`;
+  async findAll() {
+    return await this.CiroRepository.find({
+      where: {
+        date: Like(`___${this.Date.getMonthAndYear()}%`),
+        deleted: false,
+      },
+      order: { date: 'DESC' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ciro`;
+  async findOne(id: string) {
+    return await this.CiroRepository.findOne({
+      where: { id: id, deleted: false },
+    })
+      .then((response) => {
+        return response;
+      })
+      .catch((e) => {
+        return false;
+      });
   }
 
-  update(id: number, updateCiroDto: UpdateCiroDto) {
-    return `This action updates a #${id} ciro`;
+  async update(id: string, updateCiroDto: UpdateCiroDto) {
+    const ciro = await this.findOne(id);
+    if (ciro) {
+      return await this.CiroRepository.update(id, updateCiroDto);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ciro`;
+  async remove(id: string) {
+    const ciro = await this.findOne(id);
+    if (ciro) {
+      return await this.CiroRepository.update(id, { deleted: true });
+    }
   }
 }

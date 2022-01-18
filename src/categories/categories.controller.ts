@@ -19,16 +19,32 @@ export class CategoriesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.categoriesService.findOne(+id);
+    return this.categoriesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoriesService.update(+id, updateCategoryDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
+    return this.categoriesService.update(id, updateCategoryDto);
+  }
+
+  @Patch('isActive/:id')
+  isActive(@Param('id') id: string, @Body() payload: object) {
+    return this.categoriesService.isActive(id, payload);
+  }
+
+  @Post('rank')
+  rank(@Body() payload) {
+    for (const i in payload) {
+      this.categoriesService.rank(payload[i].id, payload[i].rank);
+    }
+    return true;
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.categoriesService.remove(+id);
+    return this.categoriesService.remove(id);
   }
 }
