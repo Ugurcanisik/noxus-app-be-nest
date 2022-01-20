@@ -40,7 +40,6 @@ export class CategoriesController {
     for (const i in payload) {
       this.categoriesService.rank(payload[i].id, payload[i].rank);
     }
-    return true;
   }
 
   @Delete(':id')
