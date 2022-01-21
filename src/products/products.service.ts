@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { Injectable } from "@nestjs/common";
+import { CreateProductDto } from "./dto/create-product.dto";
+import { UpdateProductDto } from "./dto/update-product.dto";
 import { Product } from "./entities/product.entity";
 import { getConnection, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -9,26 +9,30 @@ import { InjectRepository } from "@nestjs/typeorm";
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
-    private ProductRepository: Repository<Product>,
-  ) {}
+    private ProductRepository: Repository<Product>
+  ) {
+  }
 
   async create(createProductDto: CreateProductDto) {
     const newProduct = await this.ProductRepository.create(createProductDto);
     return await this.ProductRepository.save(newProduct);
   }
 
-  async findAll() {
+  async findAll(id: string) {
     return await this.ProductRepository.find({
       relations: ['category'],
-      where: { deleted: false },
+      where: {
+        category: id,
+        deleted: false,
+      },
       order: { rank: 'ASC' },
     });
   }
 
   async findOne(id: string) {
     return await this.ProductRepository.findOne({
-      relations: ['category'],
-      where: { id: id, deleted: false },
+      relations: ["category"],
+      where: { id: id, deleted: false }
     })
       .then((response) => {
         return response;

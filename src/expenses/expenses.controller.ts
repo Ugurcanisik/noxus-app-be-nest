@@ -10,6 +10,7 @@ import {
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { response } from 'express';
 
 @Controller('expenses')
 export class ExpensesController {
@@ -27,8 +28,18 @@ export class ExpensesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateExpenseDto: UpdateExpenseDto) {
-    return this.expensesService.update(id, updateExpenseDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateExpenseDto: UpdateExpenseDto,
+  ) {
+    return await this.expensesService
+      .update(id, updateExpenseDto)
+      .then(async () => {
+        return await this.expensesService.findOne(id);
+      })
+      .catch((e) => {
+        return e;
+      });
   }
 
   @Delete(':id')

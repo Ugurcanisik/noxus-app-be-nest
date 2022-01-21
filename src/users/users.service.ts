@@ -1,26 +1,67 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Injectable } from "@nestjs/common";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Like, Repository } from "typeorm";
+import { User } from "./entities/user.entity";
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+
+  constructor(
+    @InjectRepository(User) private UserRepository: Repository<User>
+  ) {
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async create(createUserDto: CreateUserDto) {
+    const newUser = await this.UserRepository.create(createUserDto);
+    return await this.UserRepository.save(newUser);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findAll() {
+    return await this.UserRepository.find({
+      where: {
+        deleted: false
+      },
+      order: { name: "ASC" }
+    });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async findOne(id: string) {
+    return await this.UserRepository.findOne({
+      where: { id: id, deleted: false }
+    })
+      .then((response) => {
+        return response;
+      })
+      .catch((e) => {
+        return false;
+      });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findByUserName(payload) {
+    return await this.UserRepository.findOne({
+      where: { userName: payload, deleted: false }
+    })
+      .then((response) => {
+        return response;
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.findOne(id);
+    if (user) {
+      return await this.UserRepository.update(id, updateUserDto);
+    }
+  }
+
+  async remove(id: string) {
+    const user = await this.findOne(id);
+    if (user) {
+      return await this.UserRepository.update(id, { deleted: true });
+    }
   }
 }
