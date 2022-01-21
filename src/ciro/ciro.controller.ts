@@ -11,7 +11,6 @@ import { CiroService } from './ciro.service';
 import { CreateCiroDto } from './dto/create-ciro.dto';
 import { UpdateCiroDto } from './dto/update-ciro.dto';
 
-
 @Controller('ciro')
 export class CiroController {
   constructor(private readonly ciroService: CiroService) {}
