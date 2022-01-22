@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 export const jwtConstants = {
-  secret: "noxus-app-be-chocolate"
+  secret: process.env.JWT_SECRET
 };

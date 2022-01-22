@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  Req
+} from "@nestjs/common";
 import { ProductsService } from "./products.service";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { Storage } from "@google-cloud/storage";
+import "dotenv/config";
 
 @Controller("products")
 export class ProductsController {
@@ -9,8 +22,30 @@ export class ProductsController {
   }
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  @UseInterceptors(FileInterceptor("picture"))
+  create(@Body() createProductDto: CreateProductDto, @Req() req) {
+    if (req.file != undefined) {
+
+      const storage = new Storage({
+        keyFilename: process.env.C_FILE,
+        projectId: process.env.C_PROID
+      });
+
+      const bucket = storage.bucket(process.env.C_BUCKET);
+
+      const { originalname, buffer } = req.file;
+
+      const random = Math.floor(Math.random() * 100);
+
+      const blob = bucket.file(random + originalname);
+
+      blob.createWriteStream({ resumable: false }).end(buffer);
+
+      createProductDto.picture = random + originalname;
+    }
+
+    const addProduct = JSON.parse(JSON.stringify(createProductDto));
+    return this.productsService.create(addProduct);
   }
 
   @Get(":id")
@@ -19,8 +54,34 @@ export class ProductsController {
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+  @UseInterceptors(FileInterceptor("picture"))
+  update(
+    @Param("id") id: string,
+    @Body() updateProductDto: UpdateProductDto,
+    @Req() req
+  ) {
+    if (req.file != undefined) {
+
+      const storage = new Storage({
+        keyFilename: process.env.C_FILE,
+        projectId: process.env.C_PROID
+      });
+
+      const bucket = storage.bucket(process.env.C_BUCKET);
+
+      const { originalname, buffer } = req.file;
+
+      const random = Math.floor(Math.random() * 100);
+
+      const blob = bucket.file(random + originalname);
+
+      blob.createWriteStream({ resumable: false }).end(buffer);
+
+      updateProductDto.picture = random + originalname;
+    }
+
+    const updateProduct = JSON.parse(JSON.stringify(updateProductDto));
+    return this.productsService.update(id, updateProduct);
   }
 
   @Patch("isActive/:id")

@@ -2,6 +2,11 @@
 /dist
 /node_modules
 
+
+.env
+noxus-320023-89ac18131c2c.json
+
+
 # Logs
 logs
 *.log
