@@ -13,7 +13,7 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import { jwtConstants } from "../auth/constants";
-import { response } from "express";
+
 
 @Controller("users")
 export class UsersController {
@@ -40,27 +40,6 @@ export class UsersController {
       })
       .catch((e) => {
         console.log(e);
-      });
-  }
-
-  @Post("auth")
-  async auth(@Body() payload) {
-    return await this.usersService
-      .findByUserName(payload.userName)
-      .then(async (response) => {
-        if (response != undefined) {
-          const decryption = await bcrypt.compare(
-            payload.password,
-            response.password
-          );
-          if (decryption) {
-            return response.token;
-          } else {
-            return false;
-          }
-        } else {
-          return false;
-        }
       });
   }
 
