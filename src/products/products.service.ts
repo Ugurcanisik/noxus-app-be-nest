@@ -5,6 +5,7 @@ import { Product } from "./entities/product.entity";
 import { getConnection, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CategoriesService } from "../categories/categories.service";
+import seoUrl from "../function/function";
 
 @Injectable()
 export class ProductsService {
@@ -21,7 +22,6 @@ export class ProductsService {
   }
 
   async findAll(id: string) {
-    this.allProductsQr();
     return await this.ProductRepository.find({
       relations: ["category"],
       where: {
@@ -76,33 +76,33 @@ export class ProductsService {
     }
   }
 
-  findAlls(id: string) {
+  findProducts(id: string) {
     return this.ProductRepository.find({
       where: { category: id, deleted: false, isActive: true },
       order: { rank: "ASC" }
     });
   }
 
-  async allProductsQr() {
-    const kategori = await this.CategoryService.findAll();
+  async ProductsQr() {
+    const category = await this.CategoryService.findAll();
 
-    const productsArray = [];
+    const productArray = [];
 
-    for (let index = 0; index < kategori.length; index++) {
-      const id = kategori[index].id;
-      const name = kategori[index].name;
-      const products = await this.findAlls(id);
+    for (let i = 0; i < category.length; i++) {
+      const id = category[i].id;
+      const name = category[i].name;
+      const products = await this.findProducts(id);
 
 
-      const find = {
+      const productPush = {
         categoryName: name,
-        categorySeoUrl: name,
-        allProducts: products
+        categorySeoUrl: seoUrl(name),
+        products
       };
 
-      productsArray.push(find);
+      productArray.push(productPush);
     }
 
-    return productsArray;
+    return productArray;
   }
 }

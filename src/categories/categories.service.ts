@@ -4,6 +4,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, Repository } from "typeorm";
 import { Category } from './entities/category.entity';
+import seoUrl from '../function/function';
 
 @Injectable()
 export class CategoriesService {
@@ -65,5 +66,27 @@ export class CategoriesService {
     if (category) {
       return await this.CategoryRepository.update(id, { deleted: true });
     }
+  }
+
+  async categoryQr() {
+    const categoryArray = [];
+
+    const category = await this.CategoryRepository.find({
+      where: { deleted: false, isActive: true },
+      order: { rank: 'ASC' },
+    });
+
+    for (let i = 0; i < category.length; i++) {
+      const name = category[i].name;
+
+      const categoryPush = {
+        name: name,
+        seoUrl: seoUrl(name),
+      };
+
+      categoryArray.push(categoryPush);
+    }
+
+    return categoryArray;
   }
 }

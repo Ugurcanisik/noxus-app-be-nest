@@ -1,13 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { ProductsService } from "./products/products.service";
+import { CategoriesService } from "./categories/categories.service";
 
 @Injectable()
 export class AppService {
+  constructor(
+    private ProductsService: ProductsService,
+    private CategoriesService: CategoriesService,
+  ) {}
 
-  constructor(private ProductsService: ProductsService) {
+  qrProduct() {
+    return this.ProductsService.ProductsQr();
   }
 
-  qrProductsList() {
-    return this.ProductsService.allProductsQr();
+  qrCategory() {
+    return this.CategoriesService.categoryQr();
   }
 }
