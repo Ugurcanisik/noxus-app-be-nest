@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Get } from "@nestjs/common";
+import { Controller, Post, Body, Req, Get, Param } from "@nestjs/common";
 import { UsersService } from "../users/users.service";
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
@@ -9,11 +9,11 @@ export class AuthController {
   constructor(private readonly usersService: UsersService) {
   }
 
-  @Get()
-  async token(@Req() request) {
+  @Get(':token')
+  async token(@Param('token') token) {
     try {
       const decoded = await jwt.verify(
-        request.cookies.token,
+        token,
         jwtConstants.secret
       );
       return decoded

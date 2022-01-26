@@ -8,13 +8,12 @@ export class CookieAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const Response = context.switchToHttp().getResponse();
-
-    if (request.url === "/auth") {
+    if (request.headers.token === "token") {
       return true;
     }
 
     try {
-      await jwt.verify(request.cookies.token, jwtConstants.secret);
+      await jwt.verify(request.headers.token, jwtConstants.secret);
       return true;
     } catch (e) {
       return false;
