@@ -5,16 +5,18 @@ import {
   Body,
   Patch,
   Param,
-  Delete
-} from "@nestjs/common";
-import { CiroService } from "./ciro.service";
-import { CreateCiroDto } from "./dto/create-ciro.dto";
-import { UpdateCiroDto } from "./dto/update-ciro.dto";
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import { CiroService } from './ciro.service';
+import { CreateCiroDto } from './dto/create-ciro.dto';
+import { UpdateCiroDto } from './dto/update-ciro.dto';
+import { RolesGuard } from '../auth/auth.guard';
 
-@Controller("ciro")
+@UseGuards(RolesGuard)
+@Controller('ciro')
 export class CiroController {
-  constructor(private readonly ciroService: CiroService) {
-  }
+  constructor(private readonly ciroService: CiroService) {}
 
   @Post()
   create(@Body() createCiroDto: CreateCiroDto) {
@@ -26,13 +28,13 @@ export class CiroController {
     return this.ciroService.findAll();
   }
 
-  @Patch(":id")
-  update(@Param("id") id: string, @Body() updateCiroDto: UpdateCiroDto) {
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateCiroDto: UpdateCiroDto) {
     return this.ciroService.update(id, updateCiroDto);
   }
 
-  @Delete(":id")
-  remove(@Param("id") id: string) {
+  @Delete(':id')
+  remove(@Param('id') id: string) {
     return this.ciroService.remove(id);
   }
 }

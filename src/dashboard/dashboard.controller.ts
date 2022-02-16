@@ -5,20 +5,21 @@ import {
   Body,
   Patch,
   Param,
-  Delete
-} from "@nestjs/common";
-import { DashboardService } from "./dashboard.service";
-import { CreateDashboardDto } from "./dto/create-dashboard.dto";
-import { UpdateDashboardDto } from "./dto/update-dashboard.dto";
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import { DashboardService } from './dashboard.service';
+import { CreateDashboardDto } from './dto/create-dashboard.dto';
+import { UpdateDashboardDto } from './dto/update-dashboard.dto';
+import { RolesGuard } from '../auth/auth.guard';
 
-@Controller("dashboard")
+@UseGuards(RolesGuard)
+@Controller('dashboard')
 export class DashboardController {
-  constructor(private readonly dashboardService: DashboardService) {
-  }
+  constructor(private readonly dashboardService: DashboardService) {}
 
   @Post()
-  create(@Body() createDashboardDto: CreateDashboardDto) {
-  }
+  create(@Body() createDashboardDto: CreateDashboardDto) {}
 
   @Get()
   async findAll() {
@@ -28,19 +29,19 @@ export class DashboardController {
       total: await this.dashboardService.totalCiro(),
       average: await this.dashboardService.averageCiro(),
       max: await this.dashboardService.maxCiro(),
-      chart: await this.dashboardService.chartCiro()
+      chart: await this.dashboardService.chartCiro(),
     };
 
     const expense = {
       today: await this.dashboardService.todayExpenses(),
       month: await this.dashboardService.monthlyExpenses(),
       total: await this.dashboardService.totalExpenses(),
-      chart: await this.dashboardService.chartExpenses()
+      chart: await this.dashboardService.chartExpenses(),
     };
 
     return {
       ciro,
-      expense
+      expense,
     };
   }
 }

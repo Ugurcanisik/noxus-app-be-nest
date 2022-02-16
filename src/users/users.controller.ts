@@ -5,20 +5,21 @@ import {
   Body,
   Patch,
   Param,
-  Delete, ForbiddenException
-} from "@nestjs/common";
-import { UsersService } from "./users.service";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import * as bcrypt from "bcrypt";
-import * as jwt from "jsonwebtoken";
-import { jwtConstants } from "../auth/constants";
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+import { jwtConstants } from '../auth/constants';
+import { RolesGuard } from '../auth/auth.guard';
 
-
-@Controller("users")
+@UseGuards(RolesGuard)
+@Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {
-  }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
@@ -32,9 +33,12 @@ export class UsersController {
         const token = await jwt.sign(
           {
             id: response.id,
-            fullName: response.name + " " + response.lastName
+            name: response.name,
+            lastName: response.lastName,
+            userName: response.userName,
+            role: response.role,
           },
-          jwtConstants.secret
+          jwtConstants.secret,
         );
         return await this.usersService.update(response.id, { token: token });
       })
@@ -48,13 +52,56 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Patch(":id")
-  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
 
-  @Delete(":id")
-  remove(@Param("id") id: string) {
+  @Patch('password/:id')
+  async updatePassword(@Param('id') id: string, @Body() payload) {
+    const user = await this.usersService.findOne(id);
+
+    const oldPassword = await bcrypt.compare(
+      payload.oldPassword,
+      user.password,
+    );
+
+    if (oldPassword) {
+      const salt = await bcrypt.genSalt();
+      payload.newPassword = await bcrypt.hash(payload.newPassword, salt);
+
+      return await this.usersService.update(id, {
+        password: payload.newPassword,
+      });
+    } else {
+      return false;
+    }
+  }
+
+  @Patch('role/:id')
+  async updateRole(@Param('id') id: string, @Body() payload) {
+    const user = await this.usersService.findOne(id);
+
+    if (user) {
+      await this.usersService.update(id, payload);
+      const token = await jwt.sign(
+        {
+          id: user.id,
+          name: user.name,
+          lastName: user.lastName,
+          userName: user.userName,
+          role: payload.role,
+        },
+        jwtConstants.secret,
+      );
+      return await this.usersService.update(id, { token: token });
+    } else {
+      return false;
+    }
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
 }

@@ -1,17 +1,15 @@
-import { Injectable } from "@nestjs/common";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Like, Repository } from "typeorm";
-import { User } from "./entities/user.entity";
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-
   constructor(
-    @InjectRepository(User) private UserRepository: Repository<User>
-  ) {
-  }
+    @InjectRepository(User) private UserRepository: Repository<User>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     const newUser = await this.UserRepository.create(createUserDto);
@@ -21,27 +19,23 @@ export class UsersService {
   async findAll() {
     return await this.UserRepository.find({
       where: {
-        deleted: false
+        deleted: false,
       },
-      order: { name: "ASC" }
+      order: { name: 'ASC' },
     });
   }
 
   async findOne(id: string) {
     return await this.UserRepository.findOne({
-      where: { id: id, deleted: false }
-    })
-      .then((response) => {
-        return response;
-      })
-      .catch((e) => {
-        return false;
-      });
+      where: { id: id, deleted: false },
+    }).then((response) => {
+      return response;
+    });
   }
 
   async findByUserName(payload) {
     return await this.UserRepository.findOne({
-      where: { userName: payload, deleted: false }
+      where: { userName: payload, deleted: false },
     })
       .then((response) => {
         return response;
@@ -64,4 +58,6 @@ export class UsersService {
       return await this.UserRepository.update(id, { deleted: true });
     }
   }
+
+
 }

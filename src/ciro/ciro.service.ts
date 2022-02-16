@@ -1,19 +1,18 @@
-import { Injectable } from "@nestjs/common";
-import { CreateCiroDto } from "./dto/create-ciro.dto";
-import { UpdateCiroDto } from "./dto/update-ciro.dto";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Ciro } from "./entities/ciro.entity";
-import { getConnection, Like, Repository } from "typeorm";
-import { Dates } from "../dates";
+import { Injectable } from '@nestjs/common';
+import { CreateCiroDto } from './dto/create-ciro.dto';
+import { UpdateCiroDto } from './dto/update-ciro.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Ciro } from './entities/ciro.entity';
+import { Between, getConnection, Like, Repository } from 'typeorm';
+import { Dates } from '../dates';
 
 @Injectable()
 export class CiroService {
   Date = new Dates();
 
   constructor(
-    @InjectRepository(Ciro) private CiroRepository: Repository<Ciro>
-  ) {
-  }
+    @InjectRepository(Ciro) private CiroRepository: Repository<Ciro>,
+  ) {}
 
   async create(createCiroDto: CreateCiroDto) {
     const newCiro = await this.CiroRepository.create(createCiroDto);
@@ -24,15 +23,15 @@ export class CiroService {
     return await this.CiroRepository.find({
       where: {
         date: Like(`___${this.Date.getMonthAndYear()}%`),
-        deleted: false
+        deleted: false,
       },
-      order: { date: "DESC" }
+      order: { date: 'DESC' },
     });
   }
 
   async findOne(id: string) {
     return await this.CiroRepository.findOne({
-      where: { id: id, deleted: false }
+      where: { id: id, deleted: false },
     })
       .then((response) => {
         return response;
@@ -56,12 +55,21 @@ export class CiroService {
     }
   }
 
+  async ciroBetween(start: string, end: string) {
+    return await this.CiroRepository.find({
+      where: {
+        date: Between(end, start),
+        deleted: false,
+      },
+    });
+  }
+
   async yesterdayCiro() {
     const yesterdayCiro = await this.CiroRepository.findOne({
       where: {
         date: Like(`${this.Date.yesterDay()}%`),
-        deleted: false
-      }
+        deleted: false,
+      },
     });
 
     if (yesterdayCiro !== undefined) {
@@ -73,11 +81,11 @@ export class CiroService {
 
   async monthlyCiro() {
     const ciro = await this.CiroRepository.find({
-      select: ["total"],
+      select: ['total'],
       where: {
         date: Like(`___${this.Date.getMonthAndYear()}%`),
-        deleted: false
-      }
+        deleted: false,
+      },
     });
 
     if (ciro.length > 0) {
@@ -95,12 +103,12 @@ export class CiroService {
   async totalCiro() {
     const totalCiro = await getConnection()
       .createQueryBuilder()
-      .select("SUM(total) as totalciro")
-      .from(Ciro, "ciro")
-      .where("ciro.deleted = false")
+      .select('SUM(total) as totalciro')
+      .from(Ciro, 'ciro')
+      .where('ciro.deleted = false')
       .execute();
-    if (typeof totalCiro[0] != "undefined") {
-      return totalCiro[0]["totalciro"];
+    if (typeof totalCiro[0] != 'undefined') {
+      return totalCiro[0]['totalciro'];
     } else {
       return;
     }
@@ -108,19 +116,18 @@ export class CiroService {
 
   async averageCiro() {
     const totalCiro = await this.monthlyCiro();
-    const averageCiro = Math.round(totalCiro / this.Date.getDay());
-    return averageCiro;
+    return Math.round(totalCiro / (this.Date.getSingleDay() - 1));
   }
 
   async maxCiro() {
     const maxCiro = await getConnection()
       .createQueryBuilder()
-      .select("MAX(total) as maxciro")
-      .from(Ciro, "ciro")
-      .where("ciro.deleted = false")
+      .select('MAX(total) as maxciro')
+      .from(Ciro, 'ciro')
+      .where('ciro.deleted = false')
       .execute();
-    if (typeof maxCiro[0] != "undefined") {
-      return maxCiro[0]["maxciro"];
+    if (typeof maxCiro[0] != 'undefined') {
+      return maxCiro[0]['maxciro'];
     } else {
       return;
     }
@@ -130,21 +137,19 @@ export class CiroService {
     const allCiro = await this.CiroRepository.find({
       where: {
         date: Like(`%${this.Date.getYear()}`),
-        deleted: false
+        deleted: false,
       },
-      order: { date: "ASC" }
+      order: { date: 'ASC' },
     });
-
 
     const month = [];
     let mont = [];
     let totalCiro = [];
 
-
-    allCiro.forEach(function(key, value) {
-      const datesplit = key.date.split(".");
-      if (!month.includes(datesplit[1] + "." + datesplit[2])) {
-        month.push(datesplit[1] + "." + datesplit[2]);
+    allCiro.forEach(function (key, value) {
+      const datesplit = key.date.split('.');
+      if (!month.includes(datesplit[1] + '.' + datesplit[2])) {
+        month.push(datesplit[1] + '.' + datesplit[2]);
         mont.push(datesplit[1]);
       }
     });
@@ -156,15 +161,14 @@ export class CiroService {
       const element = month[index];
       const total = await getConnection()
         .createQueryBuilder()
-        .select("SUM(total) as totalciro")
-        .from(Ciro, "ciro")
-        .where("ciro.date like :id", { id: `%${element}` })
-        .andWhere("ciro.deleted = false")
+        .select('SUM(total) as totalciro')
+        .from(Ciro, 'ciro')
+        .where('ciro.date like :id', { id: `%${element}` })
+        .andWhere('ciro.deleted = false')
         .execute();
       totalCiro.push(total[0].totalciro);
     }
 
     return { month: mont, total: totalCiro };
-
   }
 }
