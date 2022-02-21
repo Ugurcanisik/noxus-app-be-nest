@@ -6,7 +6,7 @@ import { config } from '../orm.config';
 import { Ciro } from './entities/ciro.entity';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(config), TypeOrmModule.forFeature([Ciro])],
+  imports: [TypeOrmModule.forFeature([Ciro])],
   controllers: [CiroController],
   providers: [CiroService],
   exports: [CiroService],

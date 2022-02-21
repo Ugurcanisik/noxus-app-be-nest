@@ -33,10 +33,6 @@ export class UsersController {
         const token = await jwt.sign(
           {
             id: response.id,
-            name: response.name,
-            lastName: response.lastName,
-            userName: response.userName,
-            role: response.role,
           },
           jwtConstants.secret,
         );
@@ -81,20 +77,8 @@ export class UsersController {
   @Patch('role/:id')
   async updateRole(@Param('id') id: string, @Body() payload) {
     const user = await this.usersService.findOne(id);
-
     if (user) {
-      await this.usersService.update(id, payload);
-      const token = await jwt.sign(
-        {
-          id: user.id,
-          name: user.name,
-          lastName: user.lastName,
-          userName: user.userName,
-          role: payload.role,
-        },
-        jwtConstants.secret,
-      );
-      return await this.usersService.update(id, { token: token });
+      return await this.usersService.update(id, payload);
     } else {
       return false;
     }

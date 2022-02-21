@@ -1,11 +1,9 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { CreateProductDto } from "./create-product.dto";
-import { Category } from "../../categories/entities/category.entity";
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateProductDto } from './create-product.dto';
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {
-  picture?: string;
-  readonly name: string;
-  readonly description: string;
-  readonly price: string;
-  readonly category: any;
+  readonly name?: string;
+  readonly description?: string;
+  readonly price?: string;
+  readonly category?: any;
 }

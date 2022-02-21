@@ -24,64 +24,43 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('picture'))
-  create(@Body() createProductDto: CreateProductDto, @Req() req) {
-    if (req.file != undefined) {
-      const storage = new Storage({
-        keyFilename: process.env.C_FILE,
-        projectId: process.env.C_PROID,
-      });
-
-      const bucket = storage.bucket(process.env.C_BUCKET);
-
-      const { originalname, buffer } = req.file;
-
-      const random = Math.floor(Math.random() * 100);
-
-      const blob = bucket.file(random + originalname);
-
-      blob.createWriteStream({ resumable: false }).end(buffer);
-
-      createProductDto.picture = random + originalname;
-    }
-
-    const addProduct = JSON.parse(JSON.stringify(createProductDto));
-    return this.productsService.create(addProduct);
+  create(@Body() createProductDto: CreateProductDto) {
+    return this.productsService.create(createProductDto);
   }
 
-  @Get(':id')
-  findAll(@Param('id') id: string) {
-    return this.productsService.findAll(id);
+  @Get()
+  findAll() {
+    return this.productsService.findAll();
   }
 
   @Patch(':id')
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    return this.productsService.update(id, updateProductDto);
+  }
+
+  @Patch('picture/:id')
   @UseInterceptors(FileInterceptor('picture'))
-  update(
-    @Param('id') id: string,
-    @Body() updateProductDto: UpdateProductDto,
-    @Req() req,
-  ) {
-    if (req.file != undefined) {
-      const storage = new Storage({
-        keyFilename: process.env.C_FILE,
-        projectId: process.env.C_PROID,
-      });
+  updatePicture(@Param('id') id: string, @Req() req) {
+    const storage = new Storage({
+      keyFilename: process.env.C_FILE,
+      projectId: process.env.C_PROID,
+    });
 
-      const bucket = storage.bucket(process.env.C_BUCKET);
+    const bucket = storage.bucket(process.env.C_BUCKET);
 
-      const { originalname, buffer } = req.file;
+    const { originalname, buffer } = req.file;
 
-      const random = Math.floor(Math.random() * 100);
+    const random = Math.floor(Math.random() * 100);
 
-      const blob = bucket.file(random + originalname);
+    const blob = bucket.file(random + originalname);
 
-      blob.createWriteStream({ resumable: false }).end(buffer);
+    blob.createWriteStream({ resumable: false }).end(buffer);
 
-      updateProductDto.picture = random + originalname;
-    }
+    const picture = {
+      picture: random + originalname,
+    };
 
-    const updateProduct = JSON.parse(JSON.stringify(updateProductDto));
-    return this.productsService.update(id, updateProduct);
+    return this.productsService.update(id, picture);
   }
 
   @Patch('isActive/:id')

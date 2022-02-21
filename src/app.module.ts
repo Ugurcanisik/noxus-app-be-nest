@@ -12,9 +12,13 @@ import { SettingsModule } from './settings/settings.module';
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportsModule } from './reports/reports.module';
+import { UsersService } from './users/users.service';
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { config } from "./orm.config";
 
 @Module({
   imports: [
+    TypeOrmModule.forRoot(config),
     CategoriesModule,
     CiroModule,
     StaffModule,

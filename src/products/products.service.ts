@@ -1,41 +1,38 @@
-import { Injectable } from "@nestjs/common";
-import { CreateProductDto } from "./dto/create-product.dto";
-import { UpdateProductDto } from "./dto/update-product.dto";
-import { Product } from "./entities/product.entity";
-import { getConnection, Repository } from "typeorm";
-import { InjectRepository } from "@nestjs/typeorm";
-import { CategoriesService } from "../categories/categories.service";
-import seoUrl from "../function/function";
+import { Injectable } from '@nestjs/common';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { Product } from './entities/product.entity';
+import { getConnection, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CategoriesService } from '../categories/categories.service';
+import seoUrl from '../function/function';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private ProductRepository: Repository<Product>,
-    private readonly CategoryService: CategoriesService
-  ) {
-  }
+    private readonly CategoryService: CategoriesService,
+  ) {}
 
   async create(createProductDto: CreateProductDto) {
     const newProduct = await this.ProductRepository.create(createProductDto);
     return await this.ProductRepository.save(newProduct);
   }
 
-  async findAll(id: string) {
+  async findAll() {
     return await this.ProductRepository.find({
-      relations: ["category"],
+      relations: ['category'],
       where: {
-        category: id,
-        deleted: false
+        deleted: false,
       },
-      order: { rank: "ASC" }
     });
   }
 
   async findOne(id: string) {
     return await this.ProductRepository.findOne({
-      relations: ["category"],
-      where: { id: id, deleted: false }
+      relations: ['category'],
+      where: { id: id, deleted: false },
     })
       .then((response) => {
         return response;
@@ -79,7 +76,7 @@ export class ProductsService {
   findProducts(id: string) {
     return this.ProductRepository.find({
       where: { category: id, deleted: false, isActive: true },
-      order: { rank: "ASC" }
+      order: { rank: 'ASC' },
     });
   }
 
@@ -93,11 +90,10 @@ export class ProductsService {
       const name = category[i].name;
       const products = await this.findProducts(id);
 
-
       const productPush = {
         categoryName: name,
         categorySeoUrl: seoUrl(name),
-        products
+        products,
       };
 
       productArray.push(productPush);
