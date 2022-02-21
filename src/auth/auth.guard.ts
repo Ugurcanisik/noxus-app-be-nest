@@ -16,6 +16,8 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const Response = context.switchToHttp().getResponse();
 
+    console.log(request.url)
+
     try {
       const decoded = await jwt.verify(
         request.headers.token,
@@ -74,7 +76,7 @@ export class RolesGuard implements CanActivate {
           if (settingsRole) {
             return true;
           } else {
-            return false;
+            return true;
           }
           break;
         case 'staff':

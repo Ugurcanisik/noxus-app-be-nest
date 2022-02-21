@@ -9,9 +9,12 @@ export class AppController {
   async qrProductsList() {
     const products = await this.appService.qrProduct();
     const category = await this.appService.qrCategory();
+    const settings = await this.appService.settings();
+
     return {
       products,
       category,
+      settings,
     };
   }
 }
